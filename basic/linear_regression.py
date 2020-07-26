@@ -12,8 +12,8 @@ class LinearRegression(object):
         return self.W * x + self.b
 
 
-def loss_fn(y, y_pred):
-    return tf.reduce_mean(tf.square(y - y_pred))
+def loss_fn(Y, Y_pred):
+    return tf.reduce_mean(tf.square(Y - Y_pred))
 
 
 def train(model, optimizer, epoch, inputs, labels):
