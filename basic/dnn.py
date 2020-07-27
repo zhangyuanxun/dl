@@ -2,23 +2,39 @@ import tensorflow as tf
 import numpy as np
 
 
-class LogisticRegression(object):
+class DNN(object):
+    # 2 hidden layer deep neural network
     def __init__(self):
-        self.W = tf.Variable(tf.zeros(shape=[784, 10]), name='W')
-        self.b = tf.Variable(tf.zeros(shape=[10]), name='b')
+        self.num_hidden1 = 256
+        self.num_hidden2 = 128
+        self.num_inputs = 784
+        self.num_class = 10
+
+        self.weights = {
+            'W1': tf.Variable(tf.random.normal(shape=[self.num_inputs, self.num_hidden1], stddev=0.1)),
+            'W2': tf.Variable(tf.random.normal(shape=[self.num_hidden1, self.num_hidden2], stddev=0.1)),
+            'out': tf.Variable(tf.random.normal(shape=[self.num_hidden2, self.num_class], stddev=0.1)),
+        }
+
+        self.biases = {
+            'b1': tf.Variable(tf.random.normal(shape=[self.num_hidden1])),
+            'b2': tf.Variable(tf.random.normal(shape=[self.num_hidden2])),
+            'out': tf.Variable(tf.random.normal(shape=[self.num_class])),
+        }
 
     def __call__(self, X):
-        return tf.nn.softmax(tf.matmul(X, self.W) + self.b)
+        layer1 = tf.nn.sigmoid(tf.add(tf.matmul(X, self.weights['W1']), self.biases['b1']))
+        layer2 = tf.nn.sigmoid(tf.add(tf.matmul(layer1, self.weights['W2']), self.biases['b2']))
+        return tf.add(tf.matmul(layer2, self.weights['out']), self.biases['out'])
+
+    def trainable_variables(self):
+        return [self.weights['W1'], self.weights['W2'], self.weights['out'],
+                self.biases['b1'], self.biases['b2'], self.biases['out']]
 
 
 def loss_fn(Y, Y_pred):
-    return tf.math.reduce_mean(-tf.math.reduce_sum(Y * tf.math.log(Y_pred)))
+    return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(Y, Y_pred))
 
-
-def compute_accuracy(Y, Y_pred):
-    preds = tf.argmax(Y_pred, axis=1, output_type=tf.int64)
-    labels = tf.argmax(Y, axis=1, output_type=tf.int64)
-    return tf.reduce_mean(tf.cast(tf.equal(labels, preds), dtype=tf.float32))
 
 
 def mnist_datasets():
@@ -46,8 +62,8 @@ def train_step(model, optimizer, dataset, epoch_loss, epoch_acc):
             preds = model(inputs)
             loss = loss_fn(labels, preds)
 
-        grads = tape.gradient(loss, [model.W, model.b])
-        optimizer.apply_gradients(zip(grads, [model.W, model.b]))
+        grads = tape.gradient(loss, model.trainable_variables())
+        optimizer.apply_gradients(zip(grads, model.trainable_variables()))
 
         # update metrics
         epoch_loss.update_state(loss)
@@ -79,7 +95,7 @@ def test_fn(model, dataset):
 
 
 if __name__ == '__main__':
-    num_epoch = 20
+    num_epoch = 50
     batch_size = 100
     num_train = 60000
     num_test = 10000
@@ -89,12 +105,14 @@ if __name__ == '__main__':
     train_dataset = train_dataset.shuffle(num_train).batch(batch_size=batch_size)
     test_dataset = test_dataset.batch(batch_size=batch_size)
 
-    model = LogisticRegression()
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
+    model = DNN()
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.005)
 
     # train the model
     train_fn(model, optimizer, num_epoch, train_dataset)
 
     # test the model
     test_fn(model, test_dataset)
+
+
 

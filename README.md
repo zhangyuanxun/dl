@@ -1,1 +1,1 @@
-# deep learning algorithm
+# deep learning algorithms
