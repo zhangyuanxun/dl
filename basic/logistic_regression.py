@@ -40,7 +40,7 @@ def mnist_datasets():
     return train_dataset, test_dataset
 
 
-def train_step(model, optimizer, dataset, epoch_loss, epoch_acc):
+def train_epoch(model, optimizer, dataset, epoch_loss, epoch_acc):
     for (batch, (inputs, labels)) in enumerate(dataset):
         with tf.GradientTape() as tape:
             preds = model(inputs)
@@ -60,7 +60,7 @@ def train_fn(model, optimizer, num_epoch, train_dataset):
         epoch_loss = tf.keras.metrics.Mean()
         epoch_acc = tf.keras.metrics.CategoricalAccuracy()
 
-        train_step(model, optimizer, train_dataset, epoch_loss, epoch_acc)
+        train_epoch(model, optimizer, train_dataset, epoch_loss, epoch_acc)
 
         if epoch % display_step == 0:
             print("Epoch {:03d}: Loss: {:.3f}, Training accuracy: {:.3%}".format(epoch + 1,
