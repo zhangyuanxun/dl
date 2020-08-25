@@ -79,8 +79,8 @@ def train_fn(model, optimizer, num_epoch, train_dataset):
 
         if epoch % display_step == 0:
             print("Epoch {:03d}: Loss: {:.3f}, Training accuracy: {:.3%}".format(epoch + 1,
-                                                                        epoch_loss.result(),
-                                                                        epoch_acc.result()))
+                                                                                 epoch_loss.result(),
+                                                                                 epoch_acc.result()))
 
 
 def test_fn(model, dataset):
@@ -114,6 +114,3 @@ if __name__ == '__main__':
 
     # test the model
     test_fn(model, test_dataset)
-
-
-
