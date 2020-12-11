@@ -156,7 +156,6 @@ def generate_fn(model, char2id, id2char, vocab_size, start_text):
         outputs, state = model(inputs, state)
 
         predict_id = tf.random.categorical(outputs[-1], num_samples=1)[-1, 0].numpy()
-        #predict_id = int(np.array(tf.argmax(outputs[-1], axis=1)))
         text_generated.append(id2char[predict_id])
         inputs = outputs[-1]
 
